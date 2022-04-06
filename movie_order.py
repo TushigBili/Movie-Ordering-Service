@@ -3,29 +3,28 @@ Movie ordering service:
 Console chatbot to order movies at a certain time.
 By Tushig Biliguun
 """
-#import modules to validate the time and number
-import datetime
-import re
-#Tuples with the movies and times
-movies = ('Toy Story', 'Cars', 'Frozen')
-periods = ('Morning', 'Afternoon','Evening')
-
-time_choice = None
-movie_choice = None
-period_choice = None
-
-#list of booked seats
-ordered_seats = []
-for movie in movies:
-    ordered_seats.append(([], [], []))
-
-#Print movies and book movies
-
-def pick_movie(movies):
-
+#while rebook so if user wants to rebook, it restarts the whole program
+rebook = 'yes'
+while rebook=='yes':
+    #Dictionaries with the movies and times
+    movies = ('Toy Story', 'Cars', 'Frozen')
+    times = ('10:00', '14:00', '19:00')
+    
+    time_choice = None
+    movie_choice = None
+    
+    #Dictionary with the customer's order
+    seats = (([1,6], [], []), ([], [], []), ([], [], []))
+    
+    #Program start
+    print("Welcome to Tushig's Movie Ordering Bot")
+    
+    name = input('Please enter your name: ')
+    phone_number = input("Please enter your phone number: ")
+    
+    #Print movies
     print ()
     print ('Todays Movies')
-    print ('-------------')
     for index, movie in enumerate(movies):
         print (f"{index + 1}. {movie}")
     
@@ -33,96 +32,84 @@ def pick_movie(movies):
     print()
     
     #Select movie
-    #validate movie choice with input
-    movie_choice = None
+    #validate movie choice
     while movie_choice == None:
-        movie_choice = input ('Please, enter the movie code: ')
-        try:
-            movie_choice = int(movie_choice)
-            if movie_choice not in range(1, len(movies) + 1):
+        movie_choice = input('Please, enter the movie code: ')
+        match movie_choice:
+            case '1':
+                movie_choice = int(movie_choice)
+                print('You have selected Toy Story, now please select a time')
+            case '2':
+                movie_choice = int(movie_choice)
+                print('You have selected Cars, now please select a time')
+            case '3':
+                movie_choice = int(movie_choice)
+                print('You have selected Frozen, now please select a time')
+            case _:
                 movie_choice = None
-        except:
-            movie_choice = None
-    return movie_choice - 1
-
-#time picking function
-def pick_time(periods):
+                print("Please input a valid movie code")
     
+    #Print times
+    print ()
+    print('Movie times')
+    for index, time in enumerate(times):
+        print (f"{index + 1}. {time}")
+    
+    #Add a blank line
     print()
-    print("Movie time periods")
-    print ('-------------')
-    for index, period in enumerate(periods):
-        print (f"{index + 1}. {period}")
-    print()
+    #Select time choices
+    while time_choice == None:
+        time_choice = input('Please, enter the movie code: ')
+        match time_choice:
+            case '1':
+                time_choice = int(time_choice)
+                print('You have selected 10:00, now please select a seat')
+            case '2':
+                time_choice = int(time_choice)
+                print('You have selected 14:00, now please select a seat')
+            case '3':
+                time_choice = int(time_choice)
+                print('You have selected 19:00, now please select a seat')
+            case _:
+                time_choice = None
+                print("Please input a valid time slot code")
     
-    period_choice = None
-    while period_choice == None:
-        period_choice = input("Please select a time period: ")
-        try:
-            period_choice = int(period_choice)
-            if period_choice not in range(1, 4):
-                period_choice = None
-        except:
-            period_choice = None
-    return period_choice - 1
-
-#Seat picking function
-def pick_seat(movie_index, period_index, ordered_seats):
-    seats_txt = ''
+    #pick seats 1-10
+    seats_choices = ''
     
+    #print seat options 1-10
     print()
     print('Pick your seat')
-    print('--------------')
-    for seat in range(1,16):
-        if seat in ordered_seats[movie_index][period_index]:
-            seats_txt = seats_txt + ' xx'
+    for seat in range(1, 11):
+        if seat in seats[movie_choice-1][time_choice-1]:
+            seats_choices = seats_choices + ' XX'
         else:
-            seats_txt = seats_txt + ' {:02d}'.format(seat)
-        if seat % 5 == 0:
-            seats_txt = seats_txt + '\n'
-    print (seats_txt)
+            seats_choices = seats_choices + f" {seat}"
+    print (seats_choices)
     
+    #choose seat from 1-10
     seat_choice = None
-    while seat_choice not in range(1, 16):
+    while seat_choice not in range(1, 11):
         try:
             seat_choice = int(input("Please select the seat you want: "))
         except:
             print("Please enter a valid seat number")
             continue
-        if seat_choice not in range(1, 16) or seat_choice in ordered_seats[movie_index][period_index]:
+        if seat_choice not in range(1, 11) or seat_choice in seats[movie_choice-1][time_choice-1]:
             print("Seat not available, choose a different seat")
             seat_choice = None
         else:
-            ordered_seats[movie_index][period_index].append(seat_choice)
+            seats[movie_choice-1][time_choice-1].append(seat_choice)
             print(f"Seat {seat_choice} booked")
+        
     
-    return seat_choice
-
-#Cancel seat order
-def repeal_seats(movie_index, period_index, ordered_seats, seat_choice):
-    ordered_seats[movie_index][period_index].remove(seat_choice)
-    print("Your order has been canceled")
-
-#Beginning of bot
-print("Welcome to Tushig's Movie Ordering Bot")
-
-name = input('Please enter your name: ')
-valid_number = None
-
-#validate phone number
-while valid_number == None:
-    phone_number = input("Please enter your phone number: ")
-    valid_number = re.match(r'^([\s\d]+)$', phone_number)
-
-#ask user if they want to rebook
-rebook = 'yes'
-
-while rebook == 'yes':
-    movie_choice = pick_movie(movies)
-    period_choice = pick_time(periods)
-    seat_choice = pick_seat(movie_choice, period_choice, ordered_seats)
-    #Display order information
-    print(f"Name: {name}, Phone: {phone_number}, Movie: {movies[movie_choice]}, Period: {periods[period_choice]}")
+    #print order information
+    print(f"Name: {name}, Phone: {phone_number}, Movie: {movies[movie_choice]}, Time: {times[time_choice]}")
+    
+    #Cancel seat order
+    def repeal_seats(movie_choice, time_choice, seats, seat_choice):
+        seats[movie_choice-1][time_choice-1].remove(seat_choice)
+        print("Your order has been canceled")
     
     correct = None
     #Check if information is correct
@@ -131,14 +118,14 @@ while rebook == 'yes':
         if correct == 'yes':
             print('Thank you for your order.')
         elif correct == 'no':
-            repeal_seats(movie_choice, period_choice, ordered_seats, seat_choice)
+            repeal_seats(movie_choice, time_choice, seats, seat_choice)
     
     rebook = None
-    
-    while rebook not in ('yes', 'no'):
+    #ask user if they want to rebook
+    while  rebook not in ('yes', 'no'):
         rebook = (input("Would you like to rebook your order? ")).lower()
         if rebook == 'yes':
-            print('Rebooking...')
+            print('Okay, rebooking process starting: ')
+            continue
         elif rebook == 'no':
             print("Thank you, choose us again!")
-
